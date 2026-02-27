@@ -107,14 +107,34 @@ export default function App() {
 
   // Split text into cards
   const generateCards = () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim()) {
+      addToast('Введите текст для генерации', 'info');
+      return;
+    }
 
     // Split by double newlines, or by single newlines if they are long enough, or by sentence
-    let parts = inputText.split(/\n\s*\n/).filter(p => p.trim());
+    let parts = inputText.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
     
     // If we only have one part, try splitting by single newlines
     if (parts.length === 1) {
-      parts = inputText.split(/\n/).filter(p => p.trim().length > 20);
+      const lines = inputText.split(/\n/).map(p => p.trim()).filter(Boolean);
+      if (lines.length > 1) {
+        parts = lines;
+      }
+    }
+
+    // If still one part, try splitting by sentences
+    if (parts.length === 1) {
+      const sentences = inputText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+      const cleaned = sentences.map(p => p.trim()).filter(Boolean);
+      if (cleaned.length > 1) {
+        parts = cleaned;
+      }
+    }
+
+    if (parts.length === 0) {
+      addToast('Не удалось разбить текст на слайды', 'error');
+      return;
     }
 
     const newCards: CarouselCard[] = parts.map((text, index) => ({
@@ -206,14 +226,20 @@ export default function App() {
   };
 
   const exportSingle = async (id: string) => {
-    const element = cardRefs.current[id];
-    if (!element) return;
-
     try {
+      const exportContainer = document.getElementById('export-container');
+      if (!exportContainer) throw new Error('Export container not found');
+
+      const element = exportContainer.querySelector(
+        `[data-slide-id="${id}"]`
+      ) as HTMLElement | null;
+      if (!element) throw new Error('Export element not found');
+
       const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2 });
       saveAs(dataUrl, `card-${id}.png`);
     } catch (err) {
       console.error('Export failed', err);
+      addToast('Ошибка при экспорте', 'error');
     }
   };
 
