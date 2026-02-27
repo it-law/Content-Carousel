@@ -17,8 +17,8 @@ export const DEFAULT_STYLE: CardStyle = {
 };
 
 export const ASPECT_RATIOS = {
-  '1:1': { width: 1080, height: 1080, label: 'Квадрат (1:1)' },
-  '4:5': { width: 1080, height: 1350, label: 'Портрет (4:5)' },
+  '1:1': { width: 1080, height: 1080 },
+  '4:5': { width: 1080, height: 1350 },
 };
 
 export const COLOR_PALETTES = [
@@ -31,7 +31,8 @@ export const COLOR_PALETTES = [
   { bg: '#fafaf9', text: '#1c1917', name: 'Stone' },
 ];
 
-export const EXAMPLE_TEXT = `Как создать идеальную карусель? 🚀
+export const EXAMPLE_TEXT = {
+  ru: `Как создать идеальную карусель? 🚀
 
 1. Начните с сильного заголовка. Первый слайд должен зацепить внимание за 2 секунды.
 
@@ -41,4 +42,16 @@ export const EXAMPLE_TEXT = `Как создать идеальную карус
 
 4. Призыв к действию в конце. Попросите сохранить пост или оставить комментарий.
 
-Попробуйте наш инструмент Content Carousel прямо сейчас! ✨`;
+Попробуйте наш инструмент Content Carousel прямо сейчас! ✨`,
+  en: `How to create a great carousel? 🚀
+
+1. Start with a strong headline. The first slide should hook attention in 2 seconds.
+
+2. One slide — one idea. Don’t overload the reader with text.
+
+3. Use high contrast. Text should stay readable even in bright light.
+
+4. End with a call to action. Ask to save the post or leave a comment.
+
+Try Content Carousel right now! ✨`,
+};

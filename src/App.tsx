@@ -26,7 +26,6 @@ import {
   X,
   Copy,
   Archive,
-  Info,
   Sparkles,
   Bell
 } from 'lucide-react';
@@ -50,7 +49,111 @@ interface Toast {
   type: 'success' | 'info' | 'error';
 }
 
+type Lang = 'ru' | 'en';
+
+const COPY = {
+  ru: {
+    appName: 'Content Carousel',
+    heroDesc: 'Вставьте текст вашего поста, и мы автоматически разделим его на красивые карточки.',
+    placeholderLongText: 'Ваш длинный текст здесь...',
+    tryExample: 'Попробовать пример',
+    createCards: 'Создать карточки',
+    authorLine: 'Автор и эксперт: Фаррух Мамедов — бизнес-юрист и AI-евангелист.',
+    contactLine: 'Связаться в Telegram:',
+    edit: 'Редактор',
+    preview: 'Предпросмотр',
+    reset: 'Сбросить',
+    downloadZip: 'Скачать ZIP',
+    slidesTitle: (count: number) => `Слайды карусели (${count})`,
+    addSlide: 'Добавить слайд',
+    slideSettings: 'Параметры слайда',
+    globalSettings: 'Глобальные настройки',
+    text: 'Текст',
+    chars: 'симв.',
+    textPlaceholder: 'Введите текст...',
+    split: 'Разделить',
+    merge: 'Объединить',
+    fontSize: 'Шрифт и Размер',
+    align: 'Выравнивание',
+    colors: 'Цвета и Палитры',
+    applyToAll: 'Применить ко всем слайдам',
+    downloadSlide: 'Скачать этот слайд',
+    selectSlide: 'Выберите слайд слева,\nчтобы изменить его параметры',
+    downloadPng: 'Скачать PNG',
+    emptySlide: 'Пустой слайд...',
+    autoLabel: 'Авто',
+    autoOn: 'ВКЛ',
+    autoOff: 'ВЫКЛ',
+    confirmReset: 'Вы уверены, что хотите начать заново? Все изменения будут потеряны.',
+    language: 'Язык',
+    aspectRatioLabels: {
+      '1:1': 'Квадрат (1:1)',
+      '4:5': 'Портрет (4:5)',
+    },
+    toast: {
+      enterText: 'Введите текст для генерации',
+      splitFail: 'Не удалось разбить текст на слайды',
+      styleApplied: 'Стиль применен ко всем слайдам',
+      exportStart: 'Начинаем экспорт архива...',
+      exportOk: 'Архив успешно скачан!',
+      exportFail: 'Ошибка при создании архива',
+      exportSingleFail: 'Ошибка при экспорте',
+      addedSlide: 'Добавлен новый слайд',
+    },
+  },
+  en: {
+    appName: 'Content Carousel',
+    heroDesc: 'Paste your post text and we will automatically split it into beautiful cards.',
+    placeholderLongText: 'Your long text here...',
+    tryExample: 'Try example',
+    createCards: 'Create cards',
+    authorLine: 'Author and expert: Farrukh Mamedov — business lawyer and AI evangelist.',
+    contactLine: 'Contact on Telegram:',
+    edit: 'Editor',
+    preview: 'Preview',
+    reset: 'Reset',
+    downloadZip: 'Download ZIP',
+    slidesTitle: (count: number) => `Carousel slides (${count})`,
+    addSlide: 'Add slide',
+    slideSettings: 'Slide settings',
+    globalSettings: 'Global settings',
+    text: 'Text',
+    chars: 'chars',
+    textPlaceholder: 'Enter text...',
+    split: 'Split',
+    merge: 'Merge',
+    fontSize: 'Font and Size',
+    align: 'Alignment',
+    colors: 'Colors and Palettes',
+    applyToAll: 'Apply to all slides',
+    downloadSlide: 'Download this slide',
+    selectSlide: 'Select a slide on the left\nto edit its settings',
+    downloadPng: 'Download PNG',
+    emptySlide: 'Empty slide...',
+    autoLabel: 'Auto',
+    autoOn: 'ON',
+    autoOff: 'OFF',
+    confirmReset: 'Are you sure you want to start over? All changes will be lost.',
+    language: 'Language',
+    aspectRatioLabels: {
+      '1:1': 'Square (1:1)',
+      '4:5': 'Portrait (4:5)',
+    },
+    toast: {
+      enterText: 'Enter text to generate',
+      splitFail: 'Could not split the text into slides',
+      styleApplied: 'Style applied to all slides',
+      exportStart: 'Starting ZIP export...',
+      exportOk: 'Archive downloaded successfully!',
+      exportFail: 'Error while creating archive',
+      exportSingleFail: 'Export failed',
+      addedSlide: 'New slide added',
+    },
+  },
+} as const;
+
 export default function App() {
+  const [lang, setLang] = useState<Lang>('ru');
   const [inputText, setInputText] = useState('');
   const [cards, setCards] = useState<CarouselCard[]>([]);
   const [config, setConfig] = useState<CarouselConfig>({
@@ -62,6 +165,8 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [autoFontSize, setAutoFontSize] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const t = COPY[lang];
 
   const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -108,7 +213,7 @@ export default function App() {
   // Split text into cards
   const generateCards = () => {
     if (!inputText.trim()) {
-      addToast('Введите текст для генерации', 'info');
+      addToast(t.toast.enterText, 'info');
       return;
     }
 
@@ -133,7 +238,7 @@ export default function App() {
     }
 
     if (parts.length === 0) {
-      addToast('Не удалось разбить текст на слайды', 'error');
+      addToast(t.toast.splitFail, 'error');
       return;
     }
 
@@ -148,7 +253,7 @@ export default function App() {
   };
 
   const resetApp = () => {
-    if (confirm('Вы уверены, что хотите начать заново? Все изменения будут потеряны.')) {
+    if (confirm(t.confirmReset)) {
       setCards([]);
       setInputText('');
       setActiveCardId(null);
@@ -170,7 +275,7 @@ export default function App() {
       ...card,
       style: { ...card.style, ...styleUpdates }
     })));
-    addToast('Стиль применен ко всем слайдам');
+    addToast(t.toast.styleApplied);
   };
 
   const deleteCard = (id: string) => {
@@ -239,14 +344,14 @@ export default function App() {
       saveAs(dataUrl, `card-${id}.png`);
     } catch (err) {
       console.error('Export failed', err);
-      addToast('Ошибка при экспорте', 'error');
+      addToast(t.toast.exportSingleFail, 'error');
     }
   };
 
   const exportAll = async () => {
     if (cards.length === 0) return;
     setIsExporting(true);
-    addToast('Начинаем экспорт архива...', 'info');
+    addToast(t.toast.exportStart, 'info');
     const zip = new JSZip();
     
     try {
@@ -276,10 +381,10 @@ export default function App() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      addToast('Архив успешно скачан!', 'success');
+      addToast(t.toast.exportOk, 'success');
     } catch (err) {
       console.error('ZIP export failed', err);
-      addToast('Ошибка при создании архива', 'error');
+      addToast(t.toast.exportFail, 'error');
     } finally {
       setIsExporting(false);
     }
@@ -295,20 +400,41 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-2xl w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-indigo-600 rounded-2xl">
-              <Layout className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 mb-6 justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-indigo-600 rounded-2xl">
+                <Layout className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">{t.appName}</h1>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Content Carousel</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                {t.language}
+              </span>
+              <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+                {(['ru', 'en'] as const).map((code) => (
+                  <button
+                    key={code}
+                    onClick={() => setLang(code)}
+                    className={cn(
+                      "px-2 py-1 rounded-md text-[10px] font-bold transition-all",
+                      lang === code ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                    )}
+                  >
+                    {code.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <p className="text-gray-600 mb-6">
-            Вставьте текст вашего поста, и мы автоматически разделим его на красивые карточки.
+            {t.heroDesc}
           </p>
 
           <textarea
             className="w-full h-64 p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none text-gray-800"
-            placeholder="Ваш длинный текст здесь..."
+            placeholder={t.placeholderLongText}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
           />
@@ -327,16 +453,16 @@ export default function App() {
                         : "text-gray-500 hover:text-gray-700"
                     )}
                   >
-                    {ASPECT_RATIOS[ratio].label}
+                    {t.aspectRatioLabels[ratio]}
                   </button>
                 ))}
               </div>
               <button 
-                onClick={() => setInputText(EXAMPLE_TEXT)}
+                onClick={() => setInputText(EXAMPLE_TEXT[lang])}
                 className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 transition-colors px-1"
               >
                 <Sparkles className="w-3 h-3" />
-                Попробовать пример
+                {t.tryExample}
               </button>
             </div>
 
@@ -345,14 +471,14 @@ export default function App() {
               disabled={!inputText.trim()}
               className="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2"
             >
-              Создать карточки
+              {t.createCards}
               <Plus className="w-5 h-5" />
             </button>
           </div>
 
           <div className="mt-12 pt-8 border-t border-gray-100 text-sm text-gray-500 leading-relaxed">
-            <p>Автор и эксперт: Фаррух Мамедов — бизнес-юрист и AI-евангелист.</p>
-            <p>Связаться в Telegram: <a href="https://t.me/corporatelawyer" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">https://t.me/corporatelawyer</a></p>
+            <p>{t.authorLine}</p>
+            <p>{t.contactLine} <a href="https://t.me/corporatelawyer" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">https://t.me/corporatelawyer</a></p>
           </div>
         </motion.div>
       </div>
@@ -368,7 +494,7 @@ export default function App() {
             <div className="p-1.5 bg-indigo-600 rounded-lg">
               <Layout className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-gray-900 hidden sm:inline">Content Carousel</span>
+            <span className="font-bold text-gray-900 hidden sm:inline">{t.appName}</span>
           </div>
           
           <div className="h-6 w-px bg-gray-200 mx-2" />
@@ -382,7 +508,7 @@ export default function App() {
               )}
             >
               <Edit3 className="w-4 h-4" />
-              Редактор
+              {t.edit}
             </button>
             <button
               onClick={() => setViewMode('preview')}
@@ -392,18 +518,37 @@ export default function App() {
               )}
             >
               <Eye className="w-4 h-4" />
-              Предпросмотр
+              {t.preview}
             </button>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              {t.language}
+            </span>
+            <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+              {(['ru', 'en'] as const).map((code) => (
+                <button
+                  key={code}
+                  onClick={() => setLang(code)}
+                  className={cn(
+                    "px-2 py-1 rounded-md text-[10px] font-bold transition-all",
+                    lang === code ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  )}
+                >
+                  {code.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
           <button
             onClick={resetApp}
             className="px-3 py-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
           >
             <Trash2 className="w-4 h-4" />
-            Сбросить
+            {t.reset}
           </button>
           <button
             onClick={exportAll}
@@ -415,7 +560,7 @@ export default function App() {
             ) : (
               <Archive className="w-4 h-4" />
             )}
-            Скачать ZIP
+            {t.downloadZip}
           </button>
         </div>
       </header>
@@ -431,7 +576,7 @@ export default function App() {
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                       <Layout className="w-5 h-5 text-indigo-600" />
-                      Слайды карусели ({cards.length})
+                      {t.slidesTitle(cards.length)}
                     </h2>
                     <button 
                       onClick={() => {
@@ -442,12 +587,12 @@ export default function App() {
                         };
                         setCards([...cards, newCard]);
                         setActiveCardId(newCard.id);
-                        addToast('Добавлен новый слайд');
+                        addToast(t.toast.addedSlide);
                       }}
                       className="text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
                     >
                       <Plus className="w-4 h-4" />
-                      Добавить слайд
+                      {t.addSlide}
                     </button>
                   </div>
 
@@ -493,7 +638,7 @@ export default function App() {
                             style={{ fontSize: `${card.style.fontSize / 2.5}px` }}
                             className="whitespace-pre-wrap break-words w-full leading-tight font-bold"
                           >
-                            {card.text || <span className="opacity-20 italic">Пустой слайд...</span>}
+                            {card.text || <span className="opacity-20 italic">{t.emptySlide}</span>}
                           </div>
                         </div>
                       </Reorder.Item>
@@ -508,7 +653,7 @@ export default function App() {
                       <div className="flex items-center justify-between border-b border-gray-100 pb-4">
                         <h3 className="font-bold text-gray-900 flex items-center gap-2">
                           <Settings2 className="w-5 h-5 text-indigo-600" />
-                          Параметры слайда
+                          {t.slideSettings}
                         </h3>
                         <div className="flex gap-1">
                           <button 
@@ -536,7 +681,7 @@ export default function App() {
 
                       {/* Global Quick Settings */}
                       <div className="space-y-4">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Глобальные настройки</span>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">{t.globalSettings}</span>
                         <div className="flex flex-wrap gap-2">
                           <div className="flex gap-1 p-1 bg-gray-100 rounded-xl flex-1">
                             {(Object.keys(ASPECT_RATIOS) as AspectRatio[]).map((ratio) => (
@@ -550,7 +695,7 @@ export default function App() {
                                     : "text-gray-500 hover:text-gray-700"
                                 )}
                               >
-                                {ratio}
+                                {t.aspectRatioLabels[ratio]}
                               </button>
                             ))}
                           </div>
@@ -562,7 +707,7 @@ export default function App() {
                             )}
                           >
                             <Type className="w-3 h-3" />
-                            Авто: {autoFontSize ? 'ВКЛ' : 'ВЫКЛ'}
+                            {t.autoLabel}: {autoFontSize ? t.autoOn : t.autoOff}
                           </button>
                         </div>
                       </div>
@@ -570,33 +715,33 @@ export default function App() {
                       {/* Text Editor */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Текст</span>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">{t.text}</span>
                           <span className={cn(
                             "text-[9px] px-1.5 py-0.5 rounded-full font-bold",
                             activeCard.text.length > 200 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-500"
                           )}>
-                            {activeCard.text.length} симв.
+                            {activeCard.text.length} {t.chars}
                           </span>
                         </div>
                         <textarea
                           className="w-full h-40 p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none text-gray-800 leading-relaxed text-sm"
                           value={activeCard.text}
                           onChange={(e) => updateCard(activeCard.id, { text: e.target.value })}
-                          placeholder="Введите текст..."
+                          placeholder={t.textPlaceholder}
                         />
                         <div className="flex gap-2">
                           <button 
                             onClick={() => splitCard(activeCard.id)}
                             className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all"
                           >
-                            <Split className="w-3.5 h-3.5" /> Разделить
+                            <Split className="w-3.5 h-3.5" /> {t.split}
                           </button>
                           {cards.findIndex(c => c.id === activeCardId) < cards.length - 1 && (
                             <button 
                               onClick={() => mergeWithNext(activeCard.id)}
                               className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all"
                             >
-                              <Merge className="w-3.5 h-3.5" /> Объединить
+                              <Merge className="w-3.5 h-3.5" /> {t.merge}
                             </button>
                           )}
                         </div>
@@ -605,7 +750,7 @@ export default function App() {
                       {/* Style Parameters */}
                       <div className="space-y-6 pt-4 border-t border-gray-100">
                         <div className="space-y-3">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Шрифт и Размер</span>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">{t.fontSize}</span>
                           <div className="flex gap-2">
                             <select 
                               className="flex-1 p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none font-medium"
@@ -630,7 +775,7 @@ export default function App() {
                         </div>
 
                         <div className="space-y-3">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Выравнивание</span>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">{t.align}</span>
                           <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
                             {(['left', 'center', 'right'] as const).map((align) => (
                               <button
@@ -652,7 +797,7 @@ export default function App() {
                         </div>
 
                         <div className="space-y-3">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Цвета и Палитры</span>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">{t.colors}</span>
                           <div className="flex flex-col gap-3">
                             <div className="flex gap-2">
                               <div className="flex-1 flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-xl">
@@ -696,14 +841,14 @@ export default function App() {
                             className="w-full py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
                           >
                             <Copy className="w-4 h-4" />
-                            Применить ко всем слайдам
+                            {t.applyToAll}
                           </button>
                           <button 
                             onClick={() => exportSingle(activeCard.id)}
                             className="w-full py-3 bg-gray-100 text-gray-700 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
                           >
                             <Download className="w-4 h-4" />
-                            Скачать этот слайд
+                            {t.downloadSlide}
                           </button>
                         </div>
                       </div>
@@ -713,7 +858,7 @@ export default function App() {
                       <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto">
                         <Edit3 className="w-8 h-8 text-gray-300" />
                       </div>
-                      <p className="text-gray-400 text-sm font-medium">Выберите слайд слева,<br />чтобы изменить его параметры</p>
+                      <p className="text-gray-400 text-sm font-medium whitespace-pre-line">{t.selectSlide}</p>
                     </div>
                   )}
                 </aside>
@@ -749,7 +894,7 @@ export default function App() {
                       className="text-xs text-gray-500 hover:text-indigo-600 flex items-center gap-1 transition-colors"
                     >
                       <Download className="w-3 h-3" />
-                      Скачать PNG
+                      {t.downloadPng}
                     </button>
                   </div>
                 ))}
@@ -761,8 +906,8 @@ export default function App() {
 
       <footer className="bg-white border-t border-gray-200 py-6 px-6">
         <div className="max-w-5xl mx-auto text-sm text-gray-500 leading-relaxed">
-          <p>Автор и эксперт: Фаррух Мамедов — бизнес-юрист и AI-евангелист.</p>
-          <p>Связаться в Telegram: <a href="https://t.me/corporatelawyer" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">https://t.me/corporatelawyer</a></p>
+          <p>{t.authorLine}</p>
+          <p>{t.contactLine} <a href="https://t.me/corporatelawyer" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">https://t.me/corporatelawyer</a></p>
         </div>
       </footer>
 
